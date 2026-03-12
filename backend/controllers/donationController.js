@@ -5,7 +5,6 @@ const calculateDistance = require("../utils/calculateDistance");
 const { findSmartDonations } = require("../services/matchingService");
 
 
-// 📝 Create Donation (Restaurant Only)
 exports.createDonation = async (req, res) => {
   try {
     const { foodType, quantity, expiryTime } = req.body;
@@ -25,25 +24,6 @@ exports.createDonation = async (req, res) => {
   }
 };
 
-// 📋 Get All Donations (NGO View)
-
-// exports.getDonations = async (req, res) => {
-//   try {
-//     const ngo = req.user;
-
-//     if (!ngo.location || !ngo.location.coordinates) {
-//       return res.status(400).json({
-//         message: "NGO location not set",
-//       });
-//     }
-
-//     const donations = await findSmartDonations(ngo);
-
-//     res.json(donations);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
 exports.getDonations = async (req, res, next) => {
   try {
     const ngo = req.user;
@@ -64,7 +44,6 @@ exports.getDonations = async (req, res, next) => {
 
 
 
-// ✅ Accept Donation (NGO Only)
 exports.acceptDonation = async (req, res) => {
   try {
     const donation = await Donation.findById(req.params.id);
@@ -90,7 +69,7 @@ exports.acceptDonation = async (req, res) => {
   }
 };
 
-// 🚚 Mark Delivered
+
 exports.markDelivered = async (req, res) => {
   try {
     const donation = await Donation.findById(req.params.id);
@@ -99,12 +78,10 @@ exports.markDelivered = async (req, res) => {
       return res.status(404).json({ message: "Donation not found" });
     }
 
-    // Must be accepted first
     if (donation.status !== "accepted") {
       return res.status(400).json({ message: "Donation not accepted yet" });
     }
 
-    // Only NGO who accepted can deliver
     if (donation.acceptedBy.toString() !== req.user.id) {
       return res.status(403).json({
         message: "You are not authorized to deliver this donation",
@@ -121,7 +98,6 @@ exports.markDelivered = async (req, res) => {
   }
 };
 
-// 📜 Restaurant Donation History
 exports.getRestaurantDonations = async (req, res) => {
   try {
     const donations = await Donation.find({
@@ -137,7 +113,7 @@ exports.getRestaurantDonations = async (req, res) => {
   }
 };
 
-// 🏢 NGO Accepted Donations History
+
 exports.getNgoDonations = async (req, res) => {
   try {
     const donations = await Donation.find({

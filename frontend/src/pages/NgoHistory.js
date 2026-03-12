@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DashboardLayout from "../layout/DashboardLayout";
+import { useAuth } from "../context/AuthContext";
 
 function NgoHistory() {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   const fetchDonations = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = user?.token;
 
       const { data } = await axios.get(
-        "http://localhost:5000/api/donations/ngo/history",
+         `${process.env.REACT_APP_API_URL}/api/donations/ngo/history`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -27,10 +29,10 @@ function NgoHistory() {
 
   const markDelivered = async (id) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = user?.token;
 
       await axios.put(
-        `http://localhost:5000/api/donations/deliver/${id}`,
+        `${process.env.REACT_APP_API_URL}/api/donations/deliver/${id}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -123,7 +125,6 @@ function NgoHistory() {
   );
 }
 
-/* --- Small Components --- */
 
 function SummaryCard({ label, value }) {
   return (
@@ -169,7 +170,6 @@ function EmptyState() {
   );
 }
 
-/* --- Styles --- */
 
 const containerStyle = { maxWidth: "1100px", margin: "0 auto" };
 const headerStyle = { marginBottom: "30px" };

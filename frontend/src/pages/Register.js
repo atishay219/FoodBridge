@@ -53,7 +53,7 @@ function Register() {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        `${process.env.REACT_APP_API_URL}/api/auth/register`,
         {
           name,
           email,
@@ -78,7 +78,6 @@ function Register() {
   return (
     <div style={pageContainer}>
       
-      {/* LEFT SIDE */}
       <div style={leftPanel}>
         <div style={gradientOverlay}></div>
 
@@ -96,7 +95,6 @@ function Register() {
         </div>
       </div>
 
-      {/* RIGHT SIDE */}
       <div style={rightPanel}>
         <div style={registerCard}>
           <h2 style={formTitle}>Create Account</h2>
@@ -147,7 +145,6 @@ function Register() {
               </select>
             </div>
 
-            {/* LOCATION BUTTON */}
             <button
               type="button"
               style={locationButton}
@@ -179,7 +176,6 @@ function Register() {
   );
 }
 
-/* ---------- STYLES ---------- */
 
 const pageContainer = {
   display: "flex",

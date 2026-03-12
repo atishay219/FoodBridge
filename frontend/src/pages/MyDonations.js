@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DashboardLayout from "../layout/DashboardLayout";
+import { useAuth } from "../context/AuthContext";
 
 function MyDonations() {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchDonations = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = user?.token;
 
         const { data } = await axios.get(
-          "http://localhost:5000/api/donations/restaurant/history",
+           `${process.env.REACT_APP_API_URL}/api/donations/restaurant/history`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -40,7 +42,6 @@ function MyDonations() {
     <DashboardLayout>
       <div style={containerStyle}>
 
-        {/* Header */}
         <div style={headerStyle}>
           <h2 style={titleStyle}>Donation History</h2>
           <p style={subtitleStyle}>
@@ -48,7 +49,6 @@ function MyDonations() {
           </p>
         </div>
 
-        {/* Summary Strip */}
         <div style={summaryGrid}>
           <SummaryCard label="Total" value={total} />
           <SummaryCard label="Delivered" value={delivered} />
@@ -56,7 +56,6 @@ function MyDonations() {
           <SummaryCard label="Pending" value={pending} />
         </div>
 
-        {/* Table Section */}
         <div style={tableCard}>
           {loading ? (
             <p>Loading...</p>
@@ -100,10 +99,6 @@ function MyDonations() {
     </DashboardLayout>
   );
 }
-
-/* ========================= */
-/* ===== SUB COMPONENTS ==== */
-/* ========================= */
 
 function SummaryCard({ label, value }) {
   return (
@@ -151,9 +146,6 @@ function EmptyState() {
   );
 }
 
-/* ========================= */
-/* ===== STYLES ============ */
-/* ========================= */
 
 const containerStyle = {
   maxWidth: "1100px",

@@ -1,7 +1,9 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Sidebar() {
-  const role = localStorage.getItem("role");
+  const { user } = useAuth();
+  const role = user?.role;
 
   return (
     <div style={sidebarStyle}>
@@ -39,7 +41,6 @@ function SidebarLink({ to, label }) {
   );
 }
 
-/* --- STYLES (keep yours same if you like) --- */
 
 const sidebarStyle = {
   width: "260px",

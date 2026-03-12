@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layout/DashboardLayout";
+import { useAuth } from "../context/AuthContext";
 
 function PostDonation() {
   const [foodType, setFoodType] = useState("");
@@ -11,11 +12,11 @@ function PostDonation() {
   const [successMessage, setSuccessMessage] = useState("");
 
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation
     if (!foodType || !quantity || !expiryTime) {
       return alert("Please fill all fields");
     }
@@ -26,10 +27,10 @@ function PostDonation() {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      const token = user?.token;
 
       await axios.post(
-        "http://localhost:5000/api/donations",
+         `${process.env.REACT_APP_API_URL}/api/donations`,
         {
           foodType,
           quantity,
@@ -44,12 +45,10 @@ function PostDonation() {
 
       setSuccessMessage("🎉 Donation posted successfully!");
 
-      // Reset form
       setFoodType("");
       setQuantity("");
       setExpiryTime("");
 
-      // Redirect after 1.5 sec
       setTimeout(() => {
         navigate("/my-donations");
       }, 1500);

@@ -15,8 +15,7 @@ async function getRestaurantStats(restaurantId) {
     0
   );
 
-  // Example estimation
-  const co2Saved = totalMeals * 0.5; // simple estimate
+  const co2Saved = totalMeals * 0.5;
 
   return {
     totalDonations,
@@ -40,7 +39,7 @@ async function getNgoStats(ngoId) {
     0
   );
 
-  const impactScore = totalMeals * 0.4; // simple impact estimate
+  const impactScore = totalMeals * 0.4; 
 
   return {
     totalAccepted,

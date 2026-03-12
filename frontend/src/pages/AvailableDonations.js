@@ -2,18 +2,20 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layout/DashboardLayout";
+import { useAuth } from "../context/AuthContext";
 
 function AvailableDonations() {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const fetchDonations = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = user?.token;
 
       const { data } = await axios.get(
-        "http://localhost:5000/api/donations",
+         `${process.env.REACT_APP_API_URL}/api/donations`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -29,22 +31,20 @@ function AvailableDonations() {
 
   const acceptDonation = async (id) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = user?.token;
 
       await axios.put(
-        `http://localhost:5000/api/donations/accept/${id}`,
+         `${process.env.REACT_APP_API_URL}/api/donations/accept/${id}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      // Remove donation immediately from UI
       setDonations((prev) =>
         prev.filter((donation) => donation._id !== id)
       );
 
-      // Redirect to accepted page
       navigate("/ngo-history");
 
     } catch (error) {
@@ -53,13 +53,14 @@ function AvailableDonations() {
   };
 
   useEffect(() => {
-    fetchDonations();
-  }, []);
+    if (user) {
+      fetchDonations();
+    }
+  },[user]);
 
   return (
     <DashboardLayout>
       <div style={containerStyle}>
-        {/* Header */}
         <div style={headerStyle}>
           <h2 style={titleStyle}>Available Donations</h2>
           <p style={subtitleStyle}>
@@ -67,14 +68,12 @@ function AvailableDonations() {
           </p>
         </div>
 
-        {/* Summary */}
         <div style={summaryCard}>
           <h3 style={{ margin: 0 }}>
             {donations.length} Available Nearby
           </h3>
         </div>
 
-        {/* Cards */}
         {loading ? (
           <p>Loading...</p>
         ) : donations.length === 0 ? (
@@ -98,6 +97,11 @@ function AvailableDonations() {
                 </p>
 
                 <p style={metaText}>
+                  <strong>Distance:</strong>{" "}
+                  {donation.distanceInKm?.toFixed(2)} km
+                </p>
+
+                <p style={metaText}>
                   <strong>Expires:</strong>{" "}
                   {new Date(donation.expiryTime).toLocaleString()}
                 </p>
@@ -117,9 +121,7 @@ function AvailableDonations() {
   );
 }
 
-/* ========================= */
-/* ===== COMPONENTS ======== */
-/* ========================= */
+
 
 function EmptyState() {
   return (
@@ -132,9 +134,6 @@ function EmptyState() {
   );
 }
 
-/* ========================= */
-/* ===== STYLES ============ */
-/* ========================= */
 
 const containerStyle = {
   maxWidth: "1100px",

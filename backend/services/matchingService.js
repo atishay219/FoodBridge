@@ -2,39 +2,52 @@ const Donation = require("../models/Donation");
 const calculateDistance = require("../utils/calculateDistance");
 
 async function findSmartDonations(ngo) {
+
   const rawDonations = await Donation.find({
     status: "posted",
     location: {
       $near: {
         $geometry: ngo.location,
-        $maxDistance: 10000,
+        $maxDistance: 10000, // 10km radius
       },
     },
   }).populate("restaurant", "name email");
 
   const now = new Date();
 
-  const donationsWithScore = rawDonations.map((donation) => {
-    const distanceInKm = calculateDistance(
-      ngo.location.coordinates[1],
-      ngo.location.coordinates[0],
-      donation.location.coordinates[1],
-      donation.location.coordinates[0]
-    );
+  const donationsWithScore = rawDonations
+    .map((donation) => {
 
-    const timeLeftHours =
-      (new Date(donation.expiryTime) - now) / (1000 * 60 * 60);
+      const distanceInKm = calculateDistance(
+        ngo.location.coordinates[1],
+        ngo.location.coordinates[0],
+        donation.location.coordinates[1],
+        donation.location.coordinates[0]
+      );
 
-    const score = distanceInKm * 0.7 + timeLeftHours * 0.3;
+      const timeLeftHours =
+        (new Date(donation.expiryTime) - now) / (1000 * 60 * 60);
 
-    return {
-      ...donation.toObject(),
-      distanceInKm,
-      timeLeftHours,
-      score,
-    };
-  });
+      // Ignore expired donations
+      if (timeLeftHours <= 0) {
+        return null;
+      }
 
+      // Smart priority score
+      const score =
+        distanceInKm * 0.7 +
+        (1 / timeLeftHours) * 0.3;
+
+      return {
+        ...donation.toObject(),
+        distanceInKm: Number(distanceInKm.toFixed(2)),
+        timeLeftHours: Number(timeLeftHours.toFixed(2)),
+        score,
+      };
+    })
+    .filter(Boolean);
+
+  // Lower score = higher priority
   donationsWithScore.sort((a, b) => a.score - b.score);
 
   return donationsWithScore;

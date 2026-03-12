@@ -30,13 +30,11 @@ const donationSchema = new mongoose.Schema(
       default: "posted",
     },
 
-    // ✅ NEW FIELD
     acceptedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
 
-    // ✅ NEW FIELD
     acceptedAt: {
       type: Date,
     },

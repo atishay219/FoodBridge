@@ -12,7 +12,7 @@ const {
 
 const { protect, authorize } = require("../middleware/authMiddleware");
 
-// 📝 Restaurant posts donation
+
 router.post(
   "/",
   protect,
@@ -20,7 +20,6 @@ router.post(
   createDonation
 );
 
-// 📋 NGO views available donations
 router.get(
   "/",
   protect,
@@ -28,7 +27,6 @@ router.get(
   getDonations
 );
 
-// ✅ NGO accepts donation
 router.put(
   "/accept/:id",
   protect,
@@ -36,7 +34,6 @@ router.put(
   acceptDonation
 );
 
-// 🚚 Mark delivered (NGO only for MVP)
 router.put(
   "/deliver/:id",
   protect,
@@ -44,7 +41,6 @@ router.put(
   markDelivered
 );
 
-// 🍽 Restaurant history
 router.get(
   "/restaurant/history",
   protect,
@@ -52,7 +48,7 @@ router.get(
   getRestaurantDonations
 );
 
-// 🏢 NGO history
+
 router.get(
   "/ngo/history",
   protect,

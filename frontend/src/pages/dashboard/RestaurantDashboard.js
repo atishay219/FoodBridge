@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DashboardLayout from "../../layout/DashboardLayout";
+import { useAuth } from "../../context/AuthContext";
 
 function RestaurantDashboard() {
   const [stats, setStats] = useState(null);
-  const name = localStorage.getItem("name") || "Restaurant";
+  const { user } = useAuth();
+  const name = user?.name || "Restaurant";
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = user?.token;
         const { data } = await axios.get(
-          "http://localhost:5000/api/stats/restaurant",
+           `${process.env.REACT_APP_API_URL}/api/stats/restaurant`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -27,10 +29,8 @@ function RestaurantDashboard() {
   return (
     <DashboardLayout>
       <div style={contentContainer}>
-        {/* Decorative Background */}
         <div style={decorativeCircle}></div>
 
-        {/* Welcome Section */}
         <div style={headerSection}>
           <h2 style={welcomeTitle}>
             Welcome back,{" "}
@@ -41,7 +41,6 @@ function RestaurantDashboard() {
           </p>
         </div>
 
-        {/* Stats Cards */}
         <div style={statsGrid}>
           <ImpactCard
             title="Total Donations"
@@ -63,7 +62,6 @@ function RestaurantDashboard() {
           />
         </div>
 
-        {/* Visual Fill Section */}
         <div style={illustrationSection}>
           <img
             src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png"
@@ -85,9 +83,6 @@ function RestaurantDashboard() {
   );
 }
 
-/* ========================= */
-/* ===== COMPONENTS ======== */
-/* ========================= */
 
 function ImpactCard({ title, value, icon, color }) {
   return (
@@ -117,9 +112,6 @@ function ImpactCard({ title, value, icon, color }) {
   );
 }
 
-/* ========================= */
-/* ===== STYLES ============ */
-/* ========================= */
 
 const contentContainer = {
   maxWidth: "1100px",
@@ -201,7 +193,6 @@ const cardValue = {
   margin: "6px 0 0 0",
 };
 
-/* Illustration Section */
 
 const illustrationSection = {
   display: "flex",

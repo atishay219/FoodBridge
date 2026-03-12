@@ -18,7 +18,7 @@ function Login() {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/auth/login",
+         `${process.env.REACT_APP_API_URL}/api/auth/login`,
         {
           email,
           password,
@@ -26,8 +26,6 @@ function Login() {
       );
 
       login(data);
-
-      // Redirect to dashboard
       navigate("/dashboard");
 
     } catch (error) {
@@ -39,13 +37,10 @@ function Login() {
   return (
   <div style={pageContainer}>
     
-    {/* LEFT SIDE */}
-    {/* LEFT SIDE */}
 <div style={leftPanel}>
   <div style={gradientOverlay}></div>
 
   <div style={leftContent}>
-    {/* Brand Title now uses the #10b981 Green */}
     <h1 style={brandTitle}>FoodBridge</h1>
 
     <p style={brandSubtitle}>
@@ -59,7 +54,6 @@ function Login() {
   </div>
 </div>
 
-    {/* RIGHT SIDE */}
     <div style={rightPanel}>
       <div style={loginCard}>
         <h2 style={loginTitle}>Login to Continue</h2>
@@ -146,7 +140,6 @@ const gradientOverlay = {
   position: "absolute",
   width: "100%",
   height: "100%",
-  /* Using a deep, professional tone to let the Brand color shine */
   background: "linear-gradient(135deg, #1f2937 0%, #111827 100%)" 
 };
 
@@ -154,7 +147,6 @@ const brandTitle = {
   fontSize: "42px",
   fontWeight: "800",
   marginBottom: "15px",
-  /* Keeping your brand color consistent with the previous buttons/logo */
   color: "#10b981", 
   letterSpacing: "-1px"
 };
@@ -163,17 +155,10 @@ const brandSubtitle = {
   fontSize: "17px",
   lineHeight: "1.6",
   opacity: 0.85,
-  color: "#f3f4f6", // Off-white for better readability on dark bg
+  color: "#f3f4f6",
   marginBottom: "30px"
 };
 
-// const gradientOverlay = {
-//   position: "absolute",
-//   width: "100%",
-//   height: "100%",
-//   background:
-//     "linear-gradient(135deg, #10b981 0%, #059669 100%)"
-// };
 
 const leftContent = {
   position: "relative",
@@ -181,18 +166,6 @@ const leftContent = {
   padding: "40px",
   maxWidth: "420px"
 };
-
-// const brandTitle = {
-//   fontSize: "36px",
-//   fontWeight: "800",
-//   marginBottom: "15px"
-// };
-
-// const brandSubtitle = {
-//   fontSize: "16px",
-//   opacity: 0.9,
-//   marginBottom: "30px"
-// };
 
 const illustration = {
   width: "120px",
