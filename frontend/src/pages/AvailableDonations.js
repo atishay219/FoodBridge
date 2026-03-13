@@ -105,10 +105,9 @@ function AvailableDonations() {
 
                 <p style={metaText}>
                   <strong>Distance:</strong>{" "}
-                  {donation.distanceInKm ? `${donation.distanceInKm.toFixed(1)} km` : "N/A"}
+                  {donation.distanceInKm !== undefined ? donation.distanceInKm.toFixed(2) + " km" : "N/A"}
                 </p>
 
-                {/* Simplified Location Section */}
                 {donation.location?.coordinates && (
                   <div style={{ marginTop: "8px" }}>
                     <a
@@ -153,7 +152,7 @@ function EmptyState() {
   );
 }
 
-// --- Styles ---
+
 const containerStyle = { maxWidth: "1100px", margin: "0 auto", paddingBottom: "60px" };
 const headerStyle = { marginBottom: "30px" };
 const titleStyle = { fontSize: "28px", fontWeight: "800", margin: 0, color: "#111827" };
