@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../layout/DashboardLayout";
@@ -7,56 +7,56 @@ import { useAuth } from "../context/AuthContext";
 function AvailableDonations() {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(null);
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const fetchDonations = async () => {
+  const fetchDonations = useCallback(async () => {
+    if (!user?.token) return;
+    
     try {
-      const token = user?.token;
-
+      setLoading(true);
       const { data } = await axios.get(
-         `${process.env.REACT_APP_API_URL}/api/donations`,
+        `${process.env.REACT_APP_API_URL}/api/donations`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${user.token}` },
         }
       );
-
       setDonations(data);
     } catch (error) {
-      console.log("Error fetching donations");
+      console.error("Error fetching donations:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.token]);
+
+  useEffect(() => {
+    fetchDonations();
+  }, [fetchDonations]);
 
   const acceptDonation = async (id) => {
+    if (submitting) return;
+    
     try {
+      setSubmitting(id);
       const token = user?.token;
-
       await axios.put(
-         `${process.env.REACT_APP_API_URL}/api/donations/accept/${id}`,
+        `${process.env.REACT_APP_API_URL}/api/donations/accept/${id}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      setDonations((prev) =>
-        prev.filter((donation) => donation._id !== id)
-      );
-
+      setDonations((prev) => prev.filter((donation) => donation._id !== id));
       navigate("/ngo-history");
-
     } catch (error) {
-      alert("Error accepting donation");
+      console.error("Error accepting donation:", error);
+      alert("Error accepting donation. Please try again.");
+    } finally {
+      setSubmitting(null);
     }
   };
-
-  useEffect(() => {
-    if (user) {
-      fetchDonations();
-    }
-  },[user]);
 
   return (
     <DashboardLayout>
@@ -75,7 +75,7 @@ function AvailableDonations() {
         </div>
 
         {loading ? (
-          <p>Loading...</p>
+          <p>Loading available donations...</p>
         ) : donations.length === 0 ? (
           <EmptyState />
         ) : (
@@ -92,25 +92,46 @@ function AvailableDonations() {
                 </p>
 
                 <p style={metaText}>
+                  <strong>Expires:</strong>{" "}
+                  {donation.expiryTime 
+                    ? new Date(donation.expiryTime).toLocaleString() 
+                    : "No expiry set"}
+                </p>
+
+                <p style={metaText}>
                   <strong>Restaurant:</strong>{" "}
-                  {donation.restaurant?.name}
+                  {donation.restaurant?.name || "Partner Restaurant"}
                 </p>
 
                 <p style={metaText}>
                   <strong>Distance:</strong>{" "}
-                  {donation.distanceInKm?.toFixed(2)} km
+                  {donation.distanceInKm ? `${donation.distanceInKm.toFixed(1)} km` : "N/A"}
                 </p>
 
-                <p style={metaText}>
-                  <strong>Expires:</strong>{" "}
-                  {new Date(donation.expiryTime).toLocaleString()}
-                </p>
+                {/* Simplified Location Section */}
+                {donation.location?.coordinates && (
+                  <div style={{ marginTop: "8px" }}>
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${donation.location.coordinates[1]},${donation.location.coordinates[0]}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={mapLink}
+                    >
+                      📍 View on Maps
+                    </a>
+                  </div>
+                )}
 
                 <button
-                  style={acceptButton}
+                  style={{
+                    ...acceptButton,
+                    opacity: submitting === donation._id ? 0.7 : 1,
+                    cursor: submitting === donation._id ? "not-allowed" : "pointer"
+                  }}
                   onClick={() => acceptDonation(donation._id)}
+                  disabled={submitting === donation._id}
                 >
-                  Accept Donation
+                  {submitting === donation._id ? "Processing..." : "Accept Donation"}
                 </button>
               </div>
             ))}
@@ -120,8 +141,6 @@ function AvailableDonations() {
     </DashboardLayout>
   );
 }
-
-
 
 function EmptyState() {
   return (
@@ -134,88 +153,19 @@ function EmptyState() {
   );
 }
 
-
-const containerStyle = {
-  maxWidth: "1100px",
-  margin: "0 auto",
-  paddingBottom: "60px"
-};
-
+// --- Styles ---
+const containerStyle = { maxWidth: "1100px", margin: "0 auto", paddingBottom: "60px" };
 const headerStyle = { marginBottom: "30px" };
-
-const titleStyle = {
-  fontSize: "28px",
-  fontWeight: "800",
-  margin: 0,
-  color: "#111827"
-};
-
-const subtitleStyle = {
-  color: "#6b7280",
-  marginTop: "6px"
-};
-
-const summaryCard = {
-  backgroundColor: "#ffffff",
-  padding: "20px",
-  borderRadius: "18px",
-  boxShadow: "0 8px 20px rgba(0,0,0,0.04)",
-  border: "1px solid #f3f4f6",
-  marginBottom: "30px"
-};
-
-const cardGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-  gap: "24px"
-};
-
-const donationCard = {
-  backgroundColor: "#ffffff",
-  padding: "24px",
-  borderRadius: "20px",
-  boxShadow: "0 12px 30px rgba(0,0,0,0.05)",
-  border: "1px solid #f1f5f9",
-  display: "flex",
-  flexDirection: "column",
-  gap: "10px"
-};
-
-const cardHeader = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center"
-};
-
-const metaText = {
-  fontSize: "14px",
-  color: "#374151",
-  margin: "4px 0"
-};
-
-const statusBadge = {
-  backgroundColor: "#dbeafe",
-  color: "#1e40af",
-  padding: "4px 10px",
-  borderRadius: "12px",
-  fontSize: "12px",
-  fontWeight: "600"
-};
-
-const acceptButton = {
-  marginTop: "12px",
-  padding: "10px",
-  borderRadius: "10px",
-  border: "none",
-  backgroundColor: "#10b981",
-  color: "white",
-  fontWeight: "600",
-  cursor: "pointer"
-};
-
-const emptyStyle = {
-  textAlign: "center",
-  padding: "40px"
-};
+const titleStyle = { fontSize: "28px", fontWeight: "800", margin: 0, color: "#111827" };
+const subtitleStyle = { color: "#6b7280", marginTop: "6px" };
+const summaryCard = { backgroundColor: "#ffffff", padding: "20px", borderRadius: "18px", boxShadow: "0 8px 20px rgba(0,0,0,0.04)", border: "1px solid #f3f4f6", marginBottom: "30px" };
+const cardGrid = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" };
+const donationCard = { backgroundColor: "#ffffff", padding: "24px", borderRadius: "20px", boxShadow: "0 12px 30px rgba(0,0,0,0.05)", border: "1px solid #f1f5f9", display: "flex", flexDirection: "column", gap: "10px" };
+const cardHeader = { display: "flex", justifyContent: "space-between", alignItems: "center" };
+const metaText = { fontSize: "14px", color: "#374151", margin: "4px 0" };
+const statusBadge = { backgroundColor: "#dbeafe", color: "#1e40af", padding: "4px 10px", borderRadius: "12px", fontSize: "12px", fontWeight: "600" };
+const acceptButton = { marginTop: "12px", padding: "12px", borderRadius: "10px", border: "none", backgroundColor: "#10b981", color: "white", fontWeight: "600" };
+const mapLink = { color: "#2563eb", fontWeight: "600", fontSize: "14px", textDecoration: "none", display: "inline-flex", alignItems: "center" };
+const emptyStyle = { textAlign: "center", padding: "40px" };
 
 export default AvailableDonations;

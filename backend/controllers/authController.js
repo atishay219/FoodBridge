@@ -11,7 +11,7 @@ const generateToken = (id) => {
 exports.registerUser = async (req, res) => {
   try {
 
-    const { name, email, password, role, location } = req.body;
+    const { name, email, password, role, location, address } = req.body;
 
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: "Please fill all fields" });
@@ -30,7 +30,8 @@ exports.registerUser = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      location
+      location,
+      address
     });
 
     res.status(201).json({
