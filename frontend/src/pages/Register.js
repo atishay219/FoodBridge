@@ -90,7 +90,7 @@ function Register() {
           </p>
 
           <p style={hinglishTag}>
-            "Zaya nahi, zariya bano."
+            "Zaya nahi, Zariya bano."
           </p>
         </div>
       </div>

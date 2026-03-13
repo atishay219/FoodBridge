@@ -48,7 +48,7 @@ function Login() {
     </p>
 
     
-    <p style={{ marginTop: '40px', color: '#10b981', fontWeight: '500' ,fontSize: '20px'}}>
+    <p style={{ marginTop: '40px', color: '#10b981', fontWeight: '500' ,fontSize: '20px',fontStyle: "italic"}}>
       "Zaya nahi, Zariya bano."
     </p>
   </div>
