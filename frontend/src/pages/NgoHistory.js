@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import DashboardLayout from "../layout/DashboardLayout";
 import { useAuth } from "../context/AuthContext";
@@ -8,12 +8,13 @@ function NgoHistory() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  const fetchDonations = async () => {
+  const fetchDonations = useCallback(async () => {
     try {
       const token = user?.token;
+      if (!token) return;
 
       const { data } = await axios.get(
-         `${process.env.REACT_APP_API_URL}/api/donations/ngo/history`,
+        `${process.env.REACT_APP_API_URL}/api/donations/ngo/history`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -21,11 +22,11 @@ function NgoHistory() {
 
       setDonations(data);
     } catch (error) {
-      console.log("Error fetching NGO history");
+      console.log("Error fetching NGO history", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.token]);
 
   const markDelivered = async (id) => {
     try {
@@ -47,21 +48,18 @@ function NgoHistory() {
 
   useEffect(() => {
     fetchDonations();
-  }, []);
+  }, [fetchDonations]);
 
   const total = donations.length;
-  const delivered = donations.filter(d => d.status === "delivered").length;
-  const accepted = donations.filter(d => d.status === "accepted").length;
+  const delivered = donations.filter((d) => d.status === "delivered").length;
+  const accepted = donations.filter((d) => d.status === "accepted").length;
 
   return (
     <DashboardLayout>
       <div style={containerStyle}>
-
         <div style={headerStyle}>
           <h2 style={titleStyle}>Accepted Donations</h2>
-          <p style={subtitleStyle}>
-            Track all donations you’ve collected.
-          </p>
+          <p style={subtitleStyle}>Track all donations you’ve collected.</p>
         </div>
 
         <div style={summaryGrid}>
@@ -97,7 +95,20 @@ function NgoHistory() {
                       <td style={tdStyle}>{donation.foodType}</td>
                       <td style={tdStyle}>{donation.quantity}</td>
                       <td style={tdStyle}>
-                        {donation.restaurant?.name}
+                        <div style={restroCell}>
+                          {donation.restaurant?.name}
+                          {donation.location?.coordinates && (
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${donation.location.coordinates[1]},${donation.location.coordinates[0]}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={iconLink}
+                              title="View on Map"
+                            >
+                              📍
+                            </a>
+                          )}
+                        </div>
                       </td>
                       <td style={tdStyle}>
                         <StatusBadge status={donation.status} />
@@ -119,12 +130,10 @@ function NgoHistory() {
             </div>
           )}
         </div>
-
       </div>
     </DashboardLayout>
   );
 }
-
 
 function SummaryCard({ label, value }) {
   return (
@@ -138,7 +147,7 @@ function SummaryCard({ label, value }) {
 function StatusBadge({ status }) {
   const colors = {
     delivered: { bg: "#dcfce7", text: "#166534" },
-    accepted: { bg: "#dbeafe", text: "#1e40af" }
+    accepted: { bg: "#dbeafe", text: "#1e40af" },
   };
 
   const color = colors[status] || colors.accepted;
@@ -151,7 +160,7 @@ function StatusBadge({ status }) {
         padding: "4px 10px",
         borderRadius: "12px",
         fontSize: "12px",
-        fontWeight: "600"
+        fontWeight: "600",
       }}
     >
       {status}
@@ -170,7 +179,6 @@ function EmptyState() {
   );
 }
 
-
 const containerStyle = { maxWidth: "1100px", margin: "0 auto" };
 const headerStyle = { marginBottom: "30px" };
 const titleStyle = { fontSize: "28px", fontWeight: "800", margin: 0 };
@@ -180,7 +188,7 @@ const summaryGrid = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
   gap: "20px",
-  marginBottom: "40px"
+  marginBottom: "40px",
 };
 
 const summaryCard = {
@@ -188,7 +196,7 @@ const summaryCard = {
   padding: "20px",
   borderRadius: "18px",
   boxShadow: "0 8px 20px rgba(0,0,0,0.04)",
-  border: "1px solid #f3f4f6"
+  border: "1px solid #f3f4f6",
 };
 
 const summaryLabel = { fontSize: "13px", color: "#6b7280" };
@@ -199,7 +207,7 @@ const tableCard = {
   padding: "28px",
   borderRadius: "24px",
   boxShadow: "0 15px 35px rgba(0,0,0,0.05)",
-  border: "1px solid #f1f5f9"
+  border: "1px solid #f1f5f9",
 };
 
 const tableWrapper = { overflowX: "auto" };
@@ -209,13 +217,26 @@ const thStyle = { padding: "12px", fontSize: "13px", color: "#6b7280" };
 const rowStyle = { borderBottom: "1px solid #f9fafb" };
 const tdStyle = { padding: "14px 12px", fontSize: "14px" };
 
+const restroCell = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "8px",
+};
+
+const iconLink = {
+  textDecoration: "none",
+  fontSize: "16px",
+  cursor: "pointer",
+};
+
 const deliverBtn = {
   padding: "6px 12px",
   backgroundColor: "#10b981",
   border: "none",
   borderRadius: "8px",
   color: "white",
-  cursor: "pointer"
+  cursor: "pointer",
 };
 
 const emptyStateStyle = { textAlign: "center", padding: "40px" };
