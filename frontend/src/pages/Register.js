@@ -16,42 +16,33 @@ function Register() {
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
-  const [address, setAddress] = useState("");
 
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const detectLocation = async () => {
+  const detectLocation = () => {
     if (!navigator.geolocation) {
       setMessage("Geolocation is not supported by your browser.");
       setError(true);
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const lat = position.coords.latitude;
-      const lng = position.coords.longitude;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
 
-      setLatitude(lat);
-      setLongitude(lng);
+        setLatitude(lat);
+        setLongitude(lng);
 
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
-        );
-
-        const data = await res.json();
-
-        setMessage(`Location detected: ${data.display_name}`);
+        setMessage("Location detected successfully.");
         setError(false);
-
-        setAddress(data.display_name);
-
-      } catch (error) {
-        setMessage("Location detected but address unavailable.");
+      },
+      () => {
+        setMessage("Unable to retrieve your location.");
+        setError(true);
       }
-
-    });
+    );
   };
 
   const handleRegister = async (e) => {
@@ -75,13 +66,11 @@ function Register() {
             type: "Point",
             coordinates: [longitude, latitude],
           },
-          address,
         }
       );
 
       login(data);
       navigate("/dashboard");
-
     } catch (error) {
       setMessage("Registration failed. Please try again.");
       setError(true);
@@ -90,7 +79,6 @@ function Register() {
 
   return (
     <div style={pageContainer}>
-      
       <div style={leftPanel}>
         <div style={gradientOverlay}></div>
 
@@ -168,7 +156,7 @@ function Register() {
 
             {latitude && (
               <p style={locationText}>
-                
+                Location detected successfully
               </p>
             )}
 
@@ -188,7 +176,6 @@ function Register() {
     </div>
   );
 }
-
 
 const pageContainer = {
   display: "flex",
@@ -296,12 +283,13 @@ const locationButton = {
   width: "100%",
   padding: "12px",
   backgroundColor: "#215acb",
-  border: "1px solid #e5e7eb",
+  border: "none",
   borderRadius: "8px",
   cursor: "pointer",
   marginBottom: "10px",
   fontWeight: "700",
-  fontSize : "15px",
+  fontSize: "15px",
+  color: "white"
 };
 
 const locationText = {
