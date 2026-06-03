@@ -34,7 +34,7 @@ function RestaurantDashboard() {
         <div style={headerSection}>
           <h2 style={welcomeTitle}>
             Welcome back,{" "}
-            <span style={{ color: "#10b981" }}>{name}</span> 👋
+            <span style={{ color: "#10b981" }}>{name}</span>
           </h2>
           <p style={welcomeSub}>
             Here’s a snapshot of the impact you've created.
