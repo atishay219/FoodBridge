@@ -343,6 +343,4 @@ Environment variables are configured securely on Render.
 
 Developed by  
 - **Atishay Jain**
-- **24117030**
-
 ---
